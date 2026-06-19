@@ -632,18 +632,11 @@ Please provide a thorough, well-reasoned response drawing on best practice in Au
   },
 ];
 
-// -- Username detection ---------------------------------------------------
-function detectUsername() {
-  const match = window.location.pathname.match(/\/Users\/([^\/]+)\//);
-  return match ? match[1] : null;
-}
-
+// -- Client folder path -----------------------------------------------------
+// %USERPROFILE% is expanded automatically by Windows Explorer to whoever is
+// logged in, so the same path works for every user without any detection.
 function buildClientPath(clientName) {
-  const username = detectUsername();
-  const base = username
-    ? `C:\\Users\\${username}\\Trinity Advisory\\Trinity Clients - Documents`
-    : `C:\\Users\\[your-username]\\Trinity Advisory\\Trinity Clients - Documents`;
-  return `${base}\\${clientName}\\ClientBrain`;
+  return `%USERPROFILE%\\Trinity Advisory\\Trinity Clients - Documents\\${clientName}\\ClientBrain`;
 }
 
 // -- State ------------------------------------------------------------------
