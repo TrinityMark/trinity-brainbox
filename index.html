@@ -303,12 +303,12 @@
 </head>
 <body>
 
-<div class="demo-banner">DESIGN PREVIEW -- client list is live, files and prompts still use sample data</div>
+<div class="demo-banner">DESIGN PREVIEW -- client list and client files are live, prompts still use sample data</div>
 
 <header>
   <div class="logo">Trinity Brain<span>Box</span></div>
   <div class="tagline">Client context and prompts for your GPT</div>
-  <div class="version">v0.1</div>
+  <div class="version">v0.2</div>
 </header>
 
 <main>
@@ -691,19 +691,13 @@ function selectClientValue(val, label) {
   selectedClient = val;
   checkedFiles.clear();
 
-  // Flow 2 (get client files) is not yet connected -- only show the files
-  // card for clients we have sample file data for.
-  if (MOCK_FILES[val]) {
-    const clientPath = buildClientPath(val);
-    document.getElementById('folder-path-display').textContent = clientPath;
-    document.getElementById('folder-path-display').setAttribute('data-path', clientPath);
+  const clientPath = buildClientPath(val);
+  document.getElementById('folder-path-display').textContent = clientPath;
+  document.getElementById('folder-path-display').setAttribute('data-path', clientPath);
 
-    renderFiles(val);
-    filesCard.classList.remove('col-hidden');
-    filesCard.classList.add('visible');
-  } else {
-    filesCard.classList.add('col-hidden');
-  }
+  filesCard.classList.remove('col-hidden');
+  filesCard.classList.add('visible');
+  loadClientFiles(val);
 
   refreshPromptPreview();
 }
@@ -819,27 +813,78 @@ async function loadClients() {
 
 // -- File rendering -----------------------------------------------------------
 const TYPE_ICON = { pdf: '📄', docx: '📝', xlsx: '📊', pptx: '📑', txt: '📃' };
+let currentFileNames = [];
 
-function renderFiles(clientName) {
-  const files = MOCK_FILES[clientName] || [];
+function getFileType(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  return ext;
+}
+
+// -- Load client files (Flow 2 -- live, falls back to sample data if not configured)
+async function loadClientFiles(clientName) {
   const list = document.getElementById('file-list');
-  list.innerHTML = '';
   checkedFiles.clear();
   updateFileCount();
 
-  files.forEach((f) => {
+  if (!BRAINBOX_CONFIG.GET_CLIENT_FILES_URL) {
+    // Flow 2 not configured yet -- fall back to sample data for design preview
+    const sampleFiles = (MOCK_FILES[clientName] || []).map(f => f.name);
+    currentFileNames = sampleFiles;
+    renderFiles(sampleFiles);
+    return;
+  }
+
+  list.innerHTML = `<div class="client-option-empty">Loading files...</div>`;
+
+  try {
+    const response = await fetch(BRAINBOX_CONFIG.GET_CLIENT_FILES_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientName }),
+    });
+
+    if (!response.ok) throw new Error(`Flow returned ${response.status}`);
+
+    const data = await response.json();
+    // The flow's Select step keys its output with a trailing space
+    // ("FileLeafRef "), so extract the value regardless of exact key name.
+    currentFileNames = (data.files || []).map(item => {
+      if (typeof item === 'string') return item;
+      const key = Object.keys(item).find(k => k.trim().toLowerCase().includes('fileleafref')) || Object.keys(item)[0];
+      return item[key];
+    }).filter(Boolean);
+
+    if (currentFileNames.length === 0) {
+      list.innerHTML = `<div class="client-option-empty">No files found in this client's ClientBrain folder</div>`;
+      return;
+    }
+
+    renderFiles(currentFileNames);
+  } catch (err) {
+    currentFileNames = [];
+    list.innerHTML = `<div class="client-option-empty">Could not load files -- check the ClientBrain folder exists</div>`;
+    console.error('loadClientFiles failed:', err);
+  }
+}
+
+function renderFiles(fileNames) {
+  const list = document.getElementById('file-list');
+  list.innerHTML = '';
+
+  fileNames.forEach((name) => {
+    const type = getFileType(name);
     const item = document.createElement('div');
     item.className = 'file-item';
-    item.onclick = () => toggleFile(item, f.name);
+    item.onclick = () => toggleFile(item, name);
     item.innerHTML = `
       <div class="file-checkbox">
         <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
           <path d="M1 4l3 3 5-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <span class="file-icon">${TYPE_ICON[f.type] || '📄'}</span>
-      <span class="file-name" title="${f.name}">${f.name}</span>
-      <span class="file-type type-${f.type}">${f.type}</span>
+      <span class="file-icon">${TYPE_ICON[type] || '📄'}</span>
+      <span class="file-name" title="${name}">${name}</span>
+      <span class="file-type type-${type}">${type}</span>
     `;
     list.appendChild(item);
   });
@@ -858,8 +903,7 @@ function toggleFile(item, name) {
 }
 
 function toggleSelectAll() {
-  const files = MOCK_FILES[selectedClient] || [];
-  const allSelected = checkedFiles.size === files.length;
+  const allSelected = checkedFiles.size === currentFileNames.length;
   const items = document.querySelectorAll('.file-item');
   const btn = document.querySelector('.select-all-btn');
 
@@ -868,7 +912,7 @@ function toggleSelectAll() {
     items.forEach(i => i.classList.remove('checked'));
     btn.textContent = 'Select all';
   } else {
-    files.forEach(f => checkedFiles.add(f.name));
+    currentFileNames.forEach(name => checkedFiles.add(name));
     items.forEach(i => i.classList.add('checked'));
     btn.textContent = 'Deselect all';
   }

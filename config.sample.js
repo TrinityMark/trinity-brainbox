@@ -13,8 +13,10 @@ const BRAINBOX_CONFIG = {
   // Returns: { "clients": [ { "Title": "Client Name", ... }, ... ] }
   GET_CLIENTS_URL: "",
 
-  // Flow 2 -- Get Client Files (not yet built)
-  // Expected to return: { "files": ["file1.pdf", ...] }
+  // Flow 2 -- Get Client Files
+  // Returns: { "files": [ { "FileLeafRef ": "file1.pdf" }, ... ] }
+  // Note: the key has a trailing space (a quirk of how the flow's Select
+  // step was built) -- the app code trims keys when reading this response.
   GET_CLIENT_FILES_URL: "",
 
   // Flow 3 -- Get Prompts (not yet built)
