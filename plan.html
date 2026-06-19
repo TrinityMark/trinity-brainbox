@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trinity BrainBox — Build Plan</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f0f4f8;
+    color: #1a2332;
+    line-height: 1.6;
+  }
+  header {
+    background: #0d4f5c;
+    color: white;
+    padding: 32px 48px;
+  }
+  header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+  header p { margin-top: 6px; opacity: 0.8; font-size: 0.95rem; }
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 32px; }
+
+  .section {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #0d4f5c;
+    margin-bottom: 16px;
+  }
+  h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; color: #1a2332; }
+
+  .context-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .context-card {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .context-card .num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0d4f5c;
+  }
+  .context-card p { font-size: 0.875rem; color: #4a5568; margin-top: 4px; }
+
+  .flow-cards { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+  .flow-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .flow-card.exists { border-left: 4px solid #38a169; }
+  .flow-card.new { border-left: 4px solid #ed8936; }
+  .flow-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    margin-top: 3px;
+  }
+  .badge-exists { background: #c6f6d5; color: #276749; }
+  .badge-new { background: #feebc8; color: #7b341e; }
+  .flow-info h3 { font-size: 0.95rem; font-weight: 600; }
+  .flow-info p { font-size: 0.85rem; color: #4a5568; margin-top: 4px; }
+  .flow-info code {
+    font-family: 'Consolas', monospace;
+    font-size: 0.8rem;
+    background: #edf2f7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #2d3748;
+  }
+
+  .layout-preview {
+    background: #1a2332;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    margin-top: 16px;
+  }
+  .layout-preview .label { color: #68d391; font-weight: 600; }
+  .layout-preview .hidden { color: #718096; font-style: italic; }
+  .layout-preview .step { color: #63b3ed; }
+
+  .placeholder-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  .placeholder-table th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #718096;
+    padding: 8px 12px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .placeholder-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f4f8;
+    font-size: 0.875rem;
+  }
+  .placeholder-table td code {
+    font-family: 'Consolas', monospace;
+    background: #edf2f7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #0d4f5c;
+    font-weight: 600;
+  }
+
+  .steps-list { margin-top: 16px; }
+  .step-item {
+    display: flex;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0f4f8;
+    align-items: flex-start;
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #0d4f5c;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-content h3 { font-size: 0.95rem; font-weight: 600; }
+  .step-content p { font-size: 0.85rem; color: #4a5568; margin-top: 4px; }
+
+  .checklist { margin-top: 16px; list-style: none; }
+  .checklist li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f4f8;
+    font-size: 0.875rem;
+    color: #2d3748;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .checklist .who {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #718096;
+    font-weight: 600;
+  }
+
+  .verify-list { margin-top: 16px; counter-reset: verify; }
+  .verify-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f4f8;
+    font-size: 0.875rem;
+    color: #2d3748;
+  }
+  .verify-item:last-child { border-bottom: none; }
+  .verify-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ebf4ff;
+    color: #2b6cb0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .files-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .file-card {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .file-card .filename {
+    font-family: 'Consolas', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0d4f5c;
+  }
+  .file-card p { font-size: 0.8rem; color: #4a5568; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧠 Trinity BrainBox — Build Plan</h1>
+  <p>Local web app for Trinity Advisory staff · Plain HTML/JS · No server required</p>
+</header>
+
+<div class="container">
+
+  <!-- Context -->
+  <div class="section">
+    <div class="section-title">Why we're building this</div>
+    <p>Trinity Advisory staff need a quick interface to pull together client context and curated prompts before jumping into their custom ChatGPT. Instead of hunting through SharePoint folders and copy-pasting manually, Trinity BrainBox gives them a guided three-step flow.</p>
+    <div class="context-grid">
+      <div class="context-card">
+        <div class="num">1</div>
+        <p>Pick a client (or work without one)</p>
+      </div>
+      <div class="context-card">
+        <div class="num">2</div>
+        <p>Grab the client's files from SharePoint, copy names for upload to GPT</p>
+      </div>
+      <div class="context-card">
+        <div class="num">3</div>
+        <p>Select a prompt — client name auto-fills — copy it straight into GPT</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Files -->
+  <div class="section">
+    <div class="section-title">Files we'll create</div>
+    <div class="files-grid">
+      <div class="file-card">
+        <div class="filename">index.html</div>
+        <p>The entire app — HTML, CSS, and JavaScript all in one file. Open directly in Chrome or Edge, no server needed.</p>
+      </div>
+      <div class="file-card">
+        <div class="filename">config.js</div>
+        <p>Holds the three Power Automate webhook URLs. The only file staff need to update when flows change.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flows -->
+  <div class="section">
+    <div class="section-title">Power Automate Flows (3 total)</div>
+    <div class="flow-cards">
+
+      <div class="flow-card exists">
+        <span class="flow-badge badge-exists">EXISTS</span>
+        <div class="flow-info">
+          <h3>Flow 1 — Get Clients</h3>
+          <p>Reuse the existing flow from the coaching dashboard project. HTTP POST → returns <code>[{ "name": "Acme Corp" }, ...]</code>. Copy its webhook URL into <code>config.js</code>.</p>
+        </div>
+      </div>
+
+      <div class="flow-card new">
+        <span class="flow-badge badge-new">TO BUILD</span>
+        <div class="flow-info">
+          <h3>Flow 2 — Get Client Files</h3>
+          <p>HTTP POST with body <code>{ "clientName": "Acme Corp" }</code>. Power Automate queries SharePoint <code>Shared Documents/{clientName}/ClientBrain</code> and returns the file list + folder URL.</p>
+          <p style="margin-top:8px">Site: <code>https://trinityaccountants.sharepoint.com/sites/TrinityClients</code></p>
+        </div>
+      </div>
+
+      <div class="flow-card new">
+        <span class="flow-badge badge-new">TO BUILD</span>
+        <div class="flow-info">
+          <h3>Flow 3 — Get Prompts</h3>
+          <p>HTTP POST (no body). Power Automate reads all <code>.txt</code> files from a SharePoint prompts folder and returns <code>[{ "name": "...", "content": "..." }, ...]</code>. Start flat — categories can be added later.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- UI Layout -->
+  <div class="section">
+    <div class="section-title">Screen Layout</div>
+    <div class="layout-preview">
+<span class="label">┌─────────────────────────────────────────────┐</span>
+<span class="label">│  🧠 Trinity BrainBox                                │</span>
+<span class="label">├─────────────────────────────────────────────┤</span>
+<span class="step">│  STEP 1 — CLIENT                            │</span>
+│  [ Select a client...        ▼ ]            │
+│  ○ No specific client (general)             │
+<span class="label">├─────────────────────────────────────────────┤</span>
+<span class="step">│  STEP 2 — CLIENT FILES                      │</span>
+<span class="hidden">│  (hidden until a client is selected)         │</span>
+│  SharePoint folder: [URL] [📋 Copy URL]     │
+│                                             │
+│  ☐ Document A.pdf                           │
+│  ☑ Document B.docx                          │
+│  ☑ Document C.xlsx                          │
+│                                             │
+│  [📋 Copy selected file names]              │
+<span class="label">├─────────────────────────────────────────────┤</span>
+<span class="step">│  STEP 3 — PROMPTS                           │</span>
+│  [Prompt 1]  [Prompt 2]  [Prompt 3] ...     │
+│                                             │
+│  ┌─────────────────────────────────────┐    │
+│  │ Prompt text with {{ClientName}}     │    │
+│  │ filled in and {{FileList}} replaced │    │
+│  └─────────────────────────────────────┘    │
+│  [📋 Copy prompt]                           │
+<span class="label">└─────────────────────────────────────────────┘</span>
+    </div>
+  </div>
+
+  <!-- Placeholders -->
+  <div class="section">
+    <div class="section-title">Prompt Placeholder System</div>
+    <p>Anyone writing prompts in SharePoint uses double-curly-brace syntax. The app replaces these automatically when a prompt is selected.</p>
+    <table class="placeholder-table">
+      <thead>
+        <tr>
+          <th>Placeholder</th>
+          <th>Replaced with</th>
+          <th>If no client selected</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>{{ClientName}}</code></td>
+          <td>The selected client's name</td>
+          <td>Shows <em>[Client Name]</em> as a visual cue</td>
+        </tr>
+        <tr>
+          <td><code>{{FileList}}</code></td>
+          <td>Newline-separated list of selected file names</td>
+          <td>Shows <em>[File List]</em> as a visual cue</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Build Steps -->
+  <div class="section">
+    <div class="section-title">Build Order</div>
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Create config.js</h3>
+          <p>Three placeholder webhook URLs with comments explaining what each flow must return. This is where staff paste real URLs once flows are built.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Build index.html — structure and styling</h3>
+          <p>Clean, professional look. White background, dark teal (#0d4f5c) accents, sans-serif. Three-section layout matching the wireframe above.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Wire up client dropdown (Flow 1)</h3>
+          <p>On page load, POST to Flow 1 and populate the dropdown. "No specific client" always appears at the top.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Wire up client files section (Flow 2)</h3>
+          <p>On client selection, call Flow 2, show the SharePoint folder URL with a copy button, list files as checkboxes, and show a "copy selected file names" button.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h3>Wire up prompts (Flow 3)</h3>
+          <p>Load prompts on page load in parallel with Flow 1. Show as clickable cards. On click, display text in preview panel with placeholders substituted. Copy button copies filled-in text.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <h3>Error states and polish</h3>
+          <p>If a flow URL isn't configured, show a clear "not yet configured" notice instead of a broken request. Loading spinners while flows run.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Items -->
+  <div class="section">
+    <div class="section-title">Open Items — Mark to action</div>
+    <ul class="checklist">
+      <li>
+        <div class="checkbox"></div>
+        Copy the existing client list flow webhook URL and paste it into <code>config.js</code>
+        <span class="who">Mark</span>
+      </li>
+      <li>
+        <div class="checkbox"></div>
+        Build Flow 2 (client files) in Power Automate and add webhook URL to <code>config.js</code>
+        <span class="who">Mark</span>
+      </li>
+      <li>
+        <div class="checkbox"></div>
+        Decide which SharePoint folder will hold the prompt <code>.txt</code> files
+        <span class="who">Mark</span>
+      </li>
+      <li>
+        <div class="checkbox"></div>
+        Build Flow 3 (prompts) in Power Automate and add webhook URL to <code>config.js</code>
+        <span class="who">Mark</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Verification -->
+  <div class="section">
+    <div class="section-title">How to verify it's working</div>
+    <div class="verify-list">
+      <div class="verify-item"><div class="verify-num">1</div>Open index.html in Chrome/Edge — client dropdown loads without errors</div>
+      <div class="verify-item"><div class="verify-num">2</div>Select a client — Step 2 appears, files listed, SharePoint URL correct</div>
+      <div class="verify-item"><div class="verify-num">3</div>Tick some files → "Copy selected file names" → paste into Notepad to confirm</div>
+      <div class="verify-item"><div class="verify-num">4</div>Click a prompt → <code>{{ClientName}}</code> replaced in preview, not blank</div>
+      <div class="verify-item"><div class="verify-num">5</div>"Copy prompt" → paste into custom ChatGPT — reads correctly with client data</div>
+      <div class="verify-item"><div class="verify-num">6</div>Switch to "No specific client" — file section hides, prompts still work with visual placeholders</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
