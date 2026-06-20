@@ -1,7 +1,7 @@
 # Trinity BrainBox -- Technology and Resources Reference
 
 **Built by:** Mark Nixey, Trinity Advisory -- mark.nixey@trinityadvisory.com.au  
-**Version:** 0.4
+**Version:** 0.5
 
 ---
 
