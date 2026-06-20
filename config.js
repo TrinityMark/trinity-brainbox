@@ -21,8 +21,9 @@ const BRAINBOX_CONFIG = {
   // back to "Untitled Prompt N" until that's fixed flow-side.
   GET_PROMPTS_URL: "https://bb06665214b0e7c9957df91fc7a08e.c0.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/91ad690380744e0e9e8cf82e2a2ed588/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=4v8nJgGfKqFMsweFliqVM2FtW9C7XGueiU-HQ7Ib8os",
 
-  // Flow 4 -- Save to Brain (not yet built)
+  // Flow 4 -- Save to Brain
   // App POSTs: { "clientName": "...", "contentType": "Call|Email|Conversation|Meeting", "content": "..." }
-  // Expected to create a .txt file in that client's ClientBrain folder.
-  SAVE_TO_BRAIN_URL: "",
+  // Creates a .txt file named "ContentType yyyyMMdd - ClientName.txt" in that
+  // client's ClientBrain folder. Returns: { "success": true }
+  SAVE_TO_BRAIN_URL: "https://bb06665214b0e7c9957df91fc7a08e.c0.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/eee7572c0f9943c1bad0683cfe66e7a0/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=R38y17t5iXmZuXJX-Nu6LAOLi3gc0Z9mk3Toad7oDZU",
 };

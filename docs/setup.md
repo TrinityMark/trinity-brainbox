@@ -1,7 +1,7 @@
 # Trinity BrainBox -- Setup and User Guide
 
 **Built by:** Mark Nixey, Trinity Advisory -- mark.nixey@trinityadvisory.com.au  
-**Version:** 0.3
+**Version:** 0.4
 
 ---
 

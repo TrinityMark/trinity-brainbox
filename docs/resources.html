@@ -33,14 +33,14 @@
 <body>
 <header>
   <h1>Trinity Brain<span>Box</span></h1>
-  <span class="sub">Technology and Resources Reference &nbsp;&middot;&nbsp; v0.3</span>
+  <span class="sub">Technology and Resources Reference &nbsp;&middot;&nbsp; v0.4</span>
 </header>
 <div class="container">
 
   <div class="meta">
     <div class="meta-item"><label>Built by</label><span>Mark Nixey, Trinity Advisory</span></div>
     <div class="meta-item"><label>Contact</label><span>mark.nixey@trinityadvisory.com.au</span></div>
-    <div class="meta-item"><label>Version</label><span>0.3</span></div>
+    <div class="meta-item"><label>Version</label><span>0.4</span></div>
   </div>
 
   <h2>Source Systems</h2>
@@ -71,6 +71,11 @@
         <td>Flow 3 -- Get Prompts</td>
         <td><span class="badge badge-done">Exists</span></td>
         <td><code>{ "prompts": [ { "name": "...", "content": "..." }, ... ] }</code> (name currently returns blank -- app falls back to "Untitled Prompt N")</td>
+      </tr>
+      <tr>
+        <td>Flow 4 -- Save to Brain</td>
+        <td><span class="badge badge-done">Exists</span></td>
+        <td>Creates a <code>.txt</code> file named <code>ContentType yyyyMMdd - ClientName.txt</code> in the client's ClientBrain folder. Returns <code>{ "success": true }</code></td>
       </tr>
     </tbody>
   </table>
@@ -118,6 +123,6 @@
   <p>None. The app has zero external dependencies -- no CDN links, no npm packages, no frameworks.</p>
 
 </div>
-<footer>Trinity BrainBox &middot; Trinity Advisory &middot; v0.3</footer>
+<footer>Trinity BrainBox &middot; Trinity Advisory &middot; v0.4</footer>
 </body>
 </html>

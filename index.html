@@ -345,7 +345,7 @@
 <header>
   <div class="logo">Trinity Brain<span>Box</span></div>
   <div class="tagline">Client context and prompts for your GPT</div>
-  <div class="version">v0.3</div>
+  <div class="version">v0.4</div>
 </header>
 
 <main>
@@ -498,7 +498,7 @@
     <div class="modal-title">What type of content is this?</div>
     <div class="modal-subtitle">This is used to name the file saved to the client's Brain folder.</div>
     <div class="modal-options">
-      <button class="modal-option-btn" onclick="selectContentType('Call')">Call</button>
+      <button class="modal-option-btn" onclick="selectContentType('Phone call')">Phone call</button>
       <button class="modal-option-btn" onclick="selectContentType('Email')">Email</button>
       <button class="modal-option-btn" onclick="selectContentType('Conversation')">Conversation</button>
       <button class="modal-option-btn" onclick="selectContentType('Meeting')">Meeting</button>
@@ -1214,7 +1214,7 @@ async function selectContentType(contentType) {
   // yyyymmdd -- sorts chronologically as plain text and is unambiguous for an LLM to parse
   const now = new Date();
   const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-  const fileName = `${datePrefix} ${contentType} ${selectedClient}.txt`;
+  const fileName = `${contentType} ${datePrefix} - ${selectedClient}.txt`;
 
   if (!BRAINBOX_CONFIG.SAVE_TO_BRAIN_URL) {
     hint.textContent = `Not yet connected to SharePoint -- would save as "${fileName}".`;
