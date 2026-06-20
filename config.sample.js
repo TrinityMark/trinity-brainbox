@@ -19,7 +19,12 @@ const BRAINBOX_CONFIG = {
   // step was built) -- the app code trims keys when reading this response.
   GET_CLIENT_FILES_URL: "",
 
-  // Flow 3 -- Get Prompts (not yet built)
-  // Expected to return: [ { "name": "...", "content": "..." }, ... ]
+  // Flow 3 -- Get Prompts
+  // Returns: { "prompts": [ { "name": "...", "content": "..." }, ... ] }
   GET_PROMPTS_URL: "",
+
+  // Flow 4 -- Save to Brain (not yet built)
+  // App POSTs: { "clientName": "...", "contentType": "Call|Email|Conversation|Meeting", "content": "..." }
+  // Expected to create a .txt file in that client's ClientBrain folder.
+  SAVE_TO_BRAIN_URL: "",
 };

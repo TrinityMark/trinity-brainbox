@@ -287,6 +287,43 @@
   .update-brain-actions { display: flex; gap: 8px; margin-top: 14px; }
   .update-brain-hint { font-size: 0.75rem; color: #A6A6A6; margin-top: 10px; }
 
+  /* -- Save to Brain modal -- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,35,50,0.45);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-card {
+    background: white;
+    border-radius: 12px;
+    padding: 28px;
+    width: 360px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+  .modal-title { font-size: 1rem; font-weight: 700; color: #1a2332; margin-bottom: 4px; }
+  .modal-subtitle { font-size: 0.82rem; color: #A6A6A6; margin-bottom: 18px; }
+  .modal-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .modal-option-btn {
+    padding: 12px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2d3748;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+    font-family: inherit;
+  }
+  .modal-option-btn:hover { border-color: #11377F; background: #E5F6FF; color: #11377F; }
+  .modal-cancel-row { display: flex; justify-content: flex-end; }
+
   /* -- Empty global state (no client picked) -- */
   .start-hint {
     background: white;
@@ -454,6 +491,23 @@
   </div><!-- /col-display -->
 
 </main>
+
+<!-- Save to Brain -- content type modal -->
+<div class="modal-overlay" id="content-type-modal">
+  <div class="modal-card">
+    <div class="modal-title">What type of content is this?</div>
+    <div class="modal-subtitle">This is used to name the file saved to the client's Brain folder.</div>
+    <div class="modal-options">
+      <button class="modal-option-btn" onclick="selectContentType('Call')">Call</button>
+      <button class="modal-option-btn" onclick="selectContentType('Email')">Email</button>
+      <button class="modal-option-btn" onclick="selectContentType('Conversation')">Conversation</button>
+      <button class="modal-option-btn" onclick="selectContentType('Meeting')">Meeting</button>
+    </div>
+    <div class="modal-cancel-row">
+      <button class="btn btn-ghost" onclick="closeContentTypeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <footer>Trinity BrainBox</footer>
 
@@ -1131,9 +1185,59 @@ function createNewTemplate(btn) {
 }
 
 function saveToBrain(btn) {
-  const restore = btn.innerHTML;
-  btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M1 7l4 4 8-8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Coming soon`;
-  setTimeout(() => { btn.innerHTML = restore; }, 2000);
+  const textarea = document.getElementById('update-brain-textarea');
+  const hint = document.getElementById('upload-file-hint');
+
+  if (!selectedClient) {
+    hint.textContent = 'Select a specific client first -- content is saved into that client\'s Brain folder.';
+    return;
+  }
+  if (!textarea.value.trim()) {
+    hint.textContent = 'Paste some content into the box above before saving.';
+    return;
+  }
+
+  document.getElementById('content-type-modal').classList.add('open');
+}
+
+function closeContentTypeModal() {
+  document.getElementById('content-type-modal').classList.remove('open');
+}
+
+async function selectContentType(contentType) {
+  closeContentTypeModal();
+
+  const textarea = document.getElementById('update-brain-textarea');
+  const hint = document.getElementById('upload-file-hint');
+  const content = textarea.value;
+
+  // yyyymmdd -- sorts chronologically as plain text and is unambiguous for an LLM to parse
+  const now = new Date();
+  const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+  const fileName = `${datePrefix} ${contentType} ${selectedClient}.txt`;
+
+  if (!BRAINBOX_CONFIG.SAVE_TO_BRAIN_URL) {
+    hint.textContent = `Not yet connected to SharePoint -- would save as "${fileName}".`;
+    return;
+  }
+
+  hint.textContent = 'Saving...';
+
+  try {
+    const response = await fetch(BRAINBOX_CONFIG.SAVE_TO_BRAIN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientName: selectedClient, contentType, content }),
+    });
+
+    if (!response.ok) throw new Error(`Flow returned ${response.status}`);
+
+    hint.textContent = `Saved as "${fileName}".`;
+    textarea.value = '';
+  } catch (err) {
+    hint.textContent = 'Could not save -- check the connection and try again.';
+    console.error('saveToBrain failed:', err);
+  }
 }
 
 function triggerUploadFile(btn) {
