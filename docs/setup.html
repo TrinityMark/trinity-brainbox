@@ -34,14 +34,14 @@
 <body>
 <header>
   <h1>Trinity Brain<span>Box</span></h1>
-  <span class="sub">Setup and User Guide &nbsp;&middot;&nbsp; v0.2</span>
+  <span class="sub">Setup and User Guide &nbsp;&middot;&nbsp; v0.3</span>
 </header>
 <div class="container">
 
   <div class="meta">
     <div class="meta-item"><label>Built by</label><span>Mark Nixey, Trinity Advisory</span></div>
     <div class="meta-item"><label>Contact</label><span>mark.nixey@trinityadvisory.com.au</span></div>
-    <div class="meta-item"><label>Version</label><span>0.2</span></div>
+    <div class="meta-item"><label>Version</label><span>0.3</span></div>
   </div>
 
   <h2>What is Trinity BrainBox?</h2>
@@ -102,13 +102,14 @@
     <tbody>
       <tr><td>Client list does not load</td><td>Flow URL not configured, or not signed into Microsoft 365</td><td>Check config.js for the flow URL; ensure you are online and signed in</td></tr>
       <tr><td>Files do not appear for a client</td><td>ClientBrain folder missing in SharePoint for that client</td><td>Create a ClientBrain subfolder for that client</td></tr>
-      <tr><td>Prompts do not load</td><td>Flow 3 not yet built</td><td>Build the prompts flow; confirm the prompts folder exists in SharePoint</td></tr>
+      <tr><td>Prompts do not load</td><td>No .txt files in the Prompts library, or flow URL misconfigured</td><td>Confirm files exist in the Prompts library; check config.js</td></tr>
+      <tr><td>A prompt shows as "Untitled Prompt N"</td><td>The flow returned a blank name for that file</td><td>Known issue -- check the Append to PromptsArray step's name mapping in the flow</td></tr>
       <tr><td>Copy button does not work</td><td>Browser clipboard permissions</td><td>Allow clipboard access when prompted by the browser</td></tr>
       <tr><td>Username shows as [your-username] in path</td><td>File opened from an unexpected path</td><td>Cosmetic only -- path still copies correctly if entered manually</td></tr>
     </tbody>
   </table>
 
 </div>
-<footer>Trinity BrainBox &middot; Trinity Advisory &middot; v0.2</footer>
+<footer>Trinity BrainBox &middot; Trinity Advisory &middot; v0.3</footer>
 </body>
 </html>

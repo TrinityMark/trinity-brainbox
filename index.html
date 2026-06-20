@@ -303,12 +303,12 @@
 </head>
 <body>
 
-<div class="demo-banner">DESIGN PREVIEW -- client list and client files are live, prompts still use sample data</div>
+<div class="demo-banner">DESIGN PREVIEW -- client list, client files, and prompts are all live</div>
 
 <header>
   <div class="logo">Trinity Brain<span>Box</span></div>
   <div class="tagline">Client context and prompts for your GPT</div>
-  <div class="version">v0.2</div>
+  <div class="version">v0.3</div>
 </header>
 
 <main>
@@ -552,6 +552,45 @@ Next Steps
 What happens next: follow-up meetings to be scheduled, documents to be sent, reviews to be booked, or referrals to be made.
 
 Write the summary in plain English, suitable for adding to the client file and sharing with other Trinity Advisory staff who may work on this client in future.`
+  },
+  {
+    name: "Transcript Summary",
+    content: `# ROLE
+You are creating a strategic meeting summary for {{ClientName}}.
+
+Primary files provided for this summary:{{FileList}}
+
+# TASK
+Read the entire uploaded meeting transcript and any other supporting documents in full before writing anything. Synthesise what was discussed into a structured, client-ready briefing. This is a strategic summary, not a transcription or a bare action-item list.
+
+# OUTPUT FORMAT
+Write the summary in markdown.
+- Open with a short paragraph (no heading), written in a warm, professional tone as if addressed to the client directly. Thank them for their time and give a high-level overview of what was discussed and the main outcomes reached. 3-5 sentences.
+- After the opening paragraph, organise the rest of the summary into thematic sections using markdown level-2 headings (##).
+- Use as many sections as the conversation naturally supports, typically 4 to 7.
+- Order sections by significance to the client's business, with the most consequential or time-sensitive topics first.
+- Within each section, write bullet points. Each bullet point must:
+  - Start with a short bolded phrase (2-6 words) capturing the key point, followed by an en dash
+  - Explain the relevant detail, context, or figures discussed immediately after the dash
+  - End with the recommended action or next step where one was agreed -- if none was agreed, end with the implication or what to monitor instead
+
+# HEADING RULES
+- Derive every heading directly from what was actually discussed in this specific meeting -- name it for the real topic (for example "Cashflow and Tax Timing" or "Staffing and Hiring Plans"), not a generic category.
+- Do not reuse a fixed or standard set of headings. Every meeting covers different ground, so headings must reflect only this meeting's content.
+
+# ACCURACY RULES
+- Carry through specific numbers, names, dates, dollar figures, and percentages from the transcript exactly as discussed. Do not round, generalise, or omit them.
+- Base the summary entirely on the content of the uploaded files. Do not invent details, figures, or decisions that were not discussed.
+
+# TONE
+Pragmatic and advisory throughout: confident where the position is clear, explicit about where risk or uncertainty remains, and free of filler or hedging language.
+
+# QUALITY CHECK (DO SILENTLY BEFORE RESPONDING)
+- Do the headings reflect this meeting's actual content, not a generic template?
+- Does every bullet follow the bold-phrase, en dash, detail, action pattern?
+- Have all figures, names, and dates been carried through exactly as discussed?
+- Is the tone consistent and free of hedging language throughout?
+If any check fails, revise before producing your final answer.`
   },
   {
     name: "Advice Brief",
@@ -919,10 +958,54 @@ function updateFileCount() {
 }
 
 // -- Prompt list --------------------------------------------------------------
+let currentPrompts = [];
+
+// -- Load prompts (Flow 3 -- live, falls back to sample data if not configured)
+async function loadPrompts() {
+  const list = document.getElementById('prompt-list');
+
+  if (!BRAINBOX_CONFIG.GET_PROMPTS_URL) {
+    // Flow 3 not configured yet -- fall back to sample data for design preview
+    currentPrompts = MOCK_PROMPTS;
+    renderPromptList();
+    return;
+  }
+
+  list.innerHTML = `<div class="client-option-empty">Loading prompts...</div>`;
+
+  try {
+    const response = await fetch(BRAINBOX_CONFIG.GET_PROMPTS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) throw new Error(`Flow returned ${response.status}`);
+
+    const data = await response.json();
+    // Fall back to a generic label if the flow returns a blank name for a prompt
+    currentPrompts = (data.prompts || []).map((p, i) => ({
+      name: p.name && p.name.trim() ? p.name.trim() : `Untitled Prompt ${i + 1}`,
+      content: p.content,
+    }));
+
+    if (currentPrompts.length === 0) {
+      list.innerHTML = `<div class="client-option-empty">No prompts found</div>`;
+      return;
+    }
+
+    renderPromptList();
+  } catch (err) {
+    currentPrompts = [];
+    list.innerHTML = `<div class="client-option-empty">Could not load prompts -- check connection</div>`;
+    console.error('loadPrompts failed:', err);
+  }
+}
+
 function renderPromptList() {
   const list = document.getElementById('prompt-list');
   list.innerHTML = '';
-  MOCK_PROMPTS.forEach((p, i) => {
+  currentPrompts.forEach((p, i) => {
     const item = document.createElement('div');
     item.className = 'prompt-list-item';
     item.dataset.index = i;
@@ -952,7 +1035,7 @@ function selectPrompt(index) {
 function refreshPromptPreview() {
   if (selectedPromptIndex === null) return;
 
-  const raw = MOCK_PROMPTS[selectedPromptIndex].content;
+  const raw = currentPrompts[selectedPromptIndex].content;
   const clientName = selectedClient;
   const selectedFileNames = [...checkedFiles];
   const hasFileListPlaceholder = raw.includes('{{FileList}}');
@@ -1017,7 +1100,7 @@ function copyFolderPath(btn) {
 
 function copyPrompt(btn) {
   if (selectedPromptIndex === null) return;
-  const raw = MOCK_PROMPTS[selectedPromptIndex].content;
+  const raw = currentPrompts[selectedPromptIndex].content;
   const clientName = selectedClient || '{{ClientName}}';
   const selectedFileNames = [...checkedFiles];
   const hasFileListPlaceholder = raw.includes('{{FileList}}');
@@ -1065,7 +1148,7 @@ function onBrainFileSelected(event) {
 }
 
 // -- Init -----------------------------------------------------------------
-renderPromptList();
+loadPrompts();
 loadClients();
 </script>
 </body>

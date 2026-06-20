@@ -1,7 +1,7 @@
 # Trinity BrainBox -- Setup and User Guide
 
 **Built by:** Mark Nixey, Trinity Advisory -- mark.nixey@trinityadvisory.com.au  
-**Version:** 0.2
+**Version:** 0.3
 
 ---
 
@@ -57,6 +57,7 @@ Click any prompt name in the list on the left. The prompt text will appear on th
 |---|---|---|
 | Client list does not load | Power Automate flow URL not configured, or not signed into Microsoft 365 | Check `config.js` for the flow URL; ensure you are online and signed in |
 | Files do not appear for a client | The client's `ClientBrain` folder does not exist in SharePoint yet | Create a `ClientBrain` subfolder for that client in their SharePoint folder |
-| Prompts do not load | Flow 3 not yet built | Build the prompts flow; prompts folder must exist in SharePoint |
+| Prompts do not load | No .txt files in the Prompts library, or flow URL misconfigured | Confirm files exist in the Prompts library; check config.js |
+| A prompt shows as "Untitled Prompt N" | The flow returned a blank name for that file | Known issue -- check the Append to PromptsArray step's name mapping in the flow |
 | Copy button does not work | Browser clipboard permissions | Allow clipboard access when prompted by the browser |
 | Username shows as `[your-username]` in folder path | File opened from a path the app cannot parse | This is cosmetic only -- the path still copies correctly if you paste it manually |

@@ -1,7 +1,7 @@
 # Trinity BrainBox -- Technology and Resources Reference
 
 **Built by:** Mark Nixey, Trinity Advisory -- mark.nixey@trinityadvisory.com.au  
-**Version:** 0.2
+**Version:** 0.3
 
 ---
 
@@ -21,7 +21,7 @@
 |---|---|---|
 | Flow 1 -- Get Clients | Exists (from coaching dashboard project) | JSON array: `[{ "name": "Client Name" }, ...]` |
 | Flow 2 -- Get Client Files | Exists | JSON: `{ "files": [ { "FileLeafRef ": "file1.pdf" }, ... ] }` (note the trailing space in the key -- the app trims it) |
-| Flow 3 -- Get Prompts | To be built | JSON array: `[{ "name": "Prompt Name", "content": "..." }, ...]` |
+| Flow 3 -- Get Prompts | Exists | JSON: `{ "prompts": [ { "name": "...", "content": "..." }, ... ] }` (the flow currently returns a blank "name" -- the app falls back to "Untitled Prompt N") |
 
 Flow webhook URLs are stored in `config.js` in the project root. This file is gitignored because the URLs contain signed access tokens -- copy `config.sample.js` to `config.js` and fill in the real URLs after cloning. Update `config.js` when flows are created or changed.
 
