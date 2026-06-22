@@ -278,6 +278,24 @@
   .prompt-empty-state .icon { font-size: 2rem; }
   .prompt-empty-state p { font-size: 0.875rem; }
 
+  .write-prompt-textarea {
+    width: 100%;
+    min-height: 420px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #2d3748;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+    resize: vertical;
+    outline: none;
+  }
+  .write-prompt-textarea:focus { border-color: #11377F; }
+
+  .write-prompt-item { color: #11377F; font-weight: 600; }
+  .write-prompt-item .prompt-arrow { color: #11377F; }
+
   /* Update Brain tab */
   .update-brain-body { padding: 18px 20px; }
   .update-brain-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #A6A6A6; margin-bottom: 8px; }
@@ -478,11 +496,11 @@
           <div class="panel-header">
             <div class="panel-title-group"></div>
             <div class="panel-actions">
-              <button class="btn btn-ghost" onclick="updatePromptTemplate(this)" title="Save changes back to the SharePoint template file">
+              <button class="btn btn-ghost" id="btn-update-template" onclick="updatePromptTemplate(this)" title="Save changes back to the SharePoint template file">
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
                 Update template
               </button>
-              <button class="btn btn-ghost" onclick="createNewTemplate(this)" title="Save as a new prompt template in SharePoint">
+              <button class="btn btn-ghost" id="btn-save-new-template" onclick="createNewTemplate(this)" title="Save as a new prompt template in SharePoint">
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                 Save as new template
               </button>
@@ -494,6 +512,7 @@
           </div>
           <div class="prompt-display-body">
             <div id="prompt-text" class="prompt-text"></div>
+            <textarea id="write-prompt-textarea" class="write-prompt-textarea" style="display:none" placeholder="Write your prompt here..."></textarea>
           </div>
         </div>
 
@@ -769,6 +788,7 @@ function buildClientPath(clientName) {
 // -- State ------------------------------------------------------------------
 let selectedClient = null;
 let selectedPromptIndex = null;
+let isWritingPrompt = false;
 let checkedFiles = new Set();
 let activeTab = 'prompt';
 let allClients = [];
@@ -1111,9 +1131,30 @@ async function loadPrompts() {
   }
 }
 
+const WRITE_PROMPT_TEMPLATE = `
+
+# TONE
+Pragmatic and advisory throughout: confident where the position is clear, explicit about where risk or uncertainty remains, and free of filler or hedging language.
+
+# QUALITY CHECK (DO SILENTLY BEFORE RESPONDING)
+- `;
+
 function renderPromptList() {
   const list = document.getElementById('prompt-list');
   list.innerHTML = '';
+
+  const writeItem = document.createElement('div');
+  writeItem.className = 'prompt-list-item write-prompt-item';
+  writeItem.id = 'write-prompt-item';
+  writeItem.onclick = () => selectWritePrompt();
+  writeItem.innerHTML = `
+    <span>+ Write a prompt</span>
+    <span class="prompt-arrow">
+      <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+  `;
+  list.appendChild(writeItem);
+
   currentPrompts.forEach((p, i) => {
     const item = document.createElement('div');
     item.className = 'prompt-list-item';
@@ -1131,14 +1172,38 @@ function renderPromptList() {
 
 function selectPrompt(index) {
   selectedPromptIndex = index;
+  isWritingPrompt = false;
 
-  document.querySelectorAll('.prompt-list-item').forEach((el, i) => {
-    el.classList.toggle('active', i === index);
+  document.querySelectorAll('.prompt-list-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.index == index);
   });
 
   document.getElementById('col-display').classList.remove('col-hidden');
+  document.getElementById('write-prompt-textarea').style.display = 'none';
+  document.getElementById('prompt-text').style.display = '';
+  document.getElementById('btn-update-template').style.display = '';
+  document.getElementById('btn-save-new-template').style.display = '';
 
   refreshPromptPreview();
+}
+
+function selectWritePrompt() {
+  selectedPromptIndex = null;
+  isWritingPrompt = true;
+
+  document.querySelectorAll('.prompt-list-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('write-prompt-item').classList.add('active');
+
+  document.getElementById('col-display').classList.remove('col-hidden');
+  document.getElementById('prompt-text').style.display = 'none';
+  document.getElementById('btn-update-template').style.display = 'none';
+  document.getElementById('btn-save-new-template').style.display = 'none';
+
+  const textarea = document.getElementById('write-prompt-textarea');
+  if (!textarea.value.trim()) textarea.value = WRITE_PROMPT_TEMPLATE;
+  textarea.style.display = '';
+  textarea.focus();
+  textarea.setSelectionRange(0, 0);
 }
 
 function refreshPromptPreview() {
@@ -1208,6 +1273,14 @@ function copyFolderPath(btn) {
 }
 
 function copyPrompt(btn) {
+  if (isWritingPrompt) {
+    const text = document.getElementById('write-prompt-textarea').value;
+    if (!text.trim()) return;
+    const restore = btn.innerHTML;
+    navigator.clipboard.writeText(text).then(() => flashCopied(btn, restore));
+    return;
+  }
+
   if (selectedPromptIndex === null) return;
   const raw = currentPrompts[selectedPromptIndex].content;
   const clientName = selectedClient || '{{ClientName}}';
