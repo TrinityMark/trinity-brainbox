@@ -31,7 +31,12 @@
     padding-left: 14px;
     margin-left: 2px;
   }
-  header .version { margin-left: auto; color: rgba(255,255,255,0.4); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3px; }
+  header .admin-link {
+    margin-left: auto; color: rgba(255,255,255,0.55); font-size: 0.78rem; font-weight: 600;
+    text-decoration: none; padding: 5px 10px; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px;
+  }
+  header .admin-link:hover { background: rgba(255,255,255,0.1); color: white; }
+  header .version { margin-left: 14px; color: rgba(255,255,255,0.4); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3px; }
   .demo-banner {
     background: #744210;
     color: #fefcbf;
@@ -374,6 +379,7 @@
 <header>
   <div class="logo">Trinity Brain<span>Box</span></div>
   <div class="tagline">Client context and prompts for your GPT</div>
+  <a class="admin-link" href="admin.html">Admin</a>
   <div class="version">v0.5</div>
 </header>
 
@@ -1131,13 +1137,17 @@ async function loadPrompts() {
   }
 }
 
-const WRITE_PROMPT_TEMPLATE = `
-
-# TONE
+const PROMPT_FOOTER_STORAGE_KEY = 'brainbox_prompt_footer';
+const DEFAULT_PROMPT_FOOTER = `# TONE
 Pragmatic and advisory throughout: confident where the position is clear, explicit about where risk or uncertainty remains, and free of filler or hedging language.
 
 # QUALITY CHECK (DO SILENTLY BEFORE RESPONDING)
 - `;
+
+function getWritePromptTemplate() {
+  const footer = localStorage.getItem(PROMPT_FOOTER_STORAGE_KEY) || DEFAULT_PROMPT_FOOTER;
+  return '\n\n' + footer;
+}
 
 function renderPromptList() {
   const list = document.getElementById('prompt-list');
@@ -1200,7 +1210,7 @@ function selectWritePrompt() {
   document.getElementById('btn-save-new-template').style.display = 'none';
 
   const textarea = document.getElementById('write-prompt-textarea');
-  if (!textarea.value.trim()) textarea.value = WRITE_PROMPT_TEMPLATE;
+  if (!textarea.value.trim()) textarea.value = getWritePromptTemplate();
   textarea.style.display = '';
   textarea.focus();
   textarea.setSelectionRange(0, 0);
